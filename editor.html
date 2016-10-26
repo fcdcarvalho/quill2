@@ -1,0 +1,104 @@
+<html>
+<head>
+	<script type="text/javascript" src="lib/quill.min.js"></script>
+	<script type="text/javascript" src="lib/jquery.min.js"></script>
+	<link rel="stylesheet" type="text/css" href="lib/quill.snow.css">
+	<link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body>
+	
+	<div id = "editor"></div>
+	<div id = "InsertImage" class = "overlay hidden">
+		<div class = "window">
+			<div id ="btnClose" class = "close">&times;</div>
+			<div class = "header">Inserir Imagem</div>
+			<form>
+				<div class = "section">
+					<label><input id ="rdURL" type = "radio" name="method" checked> Inserir da URL... </label>
+					<input id = "txtURL" type = "text" placeholder = "http://">
+				</div>
+				<div class = "section">
+					<label><input id="rdFile" type = "radio" name="method"> Inserir do Arquivo... </label>
+					<input id = "file" type = "file" disabled>
+				</div>
+				<div class = "section center">
+					<button id="btnInsert">Inserir Imagem</button>
+				</div>
+			</form>
+		</div>
+	</div>
+
+	<script type="text/javascript">
+	var Parchment = Quill.import ('parchment');
+	Quill.register('formats/custom-size', new Parchment.Attributor.Style('custom-size', 'font-size',{
+		scope: Parchment.Scope.INLINE,
+		whitelist:['10pt', '12pt', '14pt', '18pt', '24pt']
+	}));
+	var toolbarOptions = [
+	['bold', 'italic', 'underline'],
+
+	[{ 'list': 'ordered'}, { 'list': 'bullet' }],
+
+	[{ 'script': 'sub'}, { 'script': 'super' }],      // superscript/subscript
+
+	[{ 'indent': '-1'}, { 'indent': '+1' }],          // outdent/indent
+	  
+	[{ 'custom-size': ['10pt', '12pt', '14pt', '18pt', '24pt']}],  // custom dropdown
+
+	[{ 'color': [] }, { 'background': [] }],          // dropdown with defaults from theme
+	
+	[{ 'align': [] }],
+
+	['link', "image", 'video', 'formula'],
+
+	['clean']
+	
+	];
+	var quill = new Quill('#editor', {
+   	modules:{
+   	 	toolbar: toolbarOptions
+   	},
+   	theme: 'snow'
+  	});
+
+	var toolbar = quill.getModule('toolbar');
+	toolbar.addHandler('image', function(){
+	$("#InsertImage").show();
+	$("#txtURL").focus();
+	});
+	$("#btnClose").click(function(){
+	$("#InsertImage").hide();
+	$("#txtURL").val("");
+	$("#file").val("");
+	$("#rdURL").click();
+
+	});
+	$("#rdURL").click(function(){
+	$("#txtURL").prop("disabled", false);
+	$("#file").prop("disabled", true);
+	});
+	$("#rdFile").click(function(){
+	$("#txtURL").prop("disabled", true);
+	$("#file").prop("disabled", false);
+	});
+
+
+	$("#btnInsert").click(function(e) {
+	 	e.preventDefault();
+	if ($("#rdURL").prop("checked")){
+	 	var selection = quill.getSelection(true);
+	 	var url = $("#txtURL").val();
+	 	quill.insertEmbed(selection.index, 'image', url);
+	} else {
+	 	//Implementar upload de arquivo.
+	 	//do file input #file
+	}
+	$("#InsertImage").hide();
+	$("#txtURL").val("");
+	$("#file").val("");
+	$("#rdURL").click();
+	});
+	</script>
+
+</body>
+</html>
