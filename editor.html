@@ -1,7 +1,6 @@
 <html>
 <head>
 	<script type="text/javascript" src="lib/quill.min.js"></script>
-	<script type="text/javascript" src="lib/jquery.min.js"></script>
 	<link rel="stylesheet" type="text/css" href="lib/quill.snow.css">
 	<link rel="stylesheet" type="text/css" href="style.css">
 </head>
@@ -28,77 +27,203 @@
 		</div>
 	</div>
 
-	<script type="text/javascript">
-	var Parchment = Quill.import ('parchment');
-	Quill.register('formats/custom-size', new Parchment.Attributor.Style('custom-size', 'font-size',{
-		scope: Parchment.Scope.INLINE,
-		whitelist:['10pt', '12pt', '14pt', '18pt', '24pt']
-	}));
-	var toolbarOptions = [
-	['bold', 'italic', 'underline'],
+<script type="text/javascript">
+var Parchment = Quill.import ('parchment');
+Quill.register('formats/custom-size', new Parchment.Attributor.Style('custom-size', 'font-size',{
+	scope: Parchment.Scope.INLINE,
+	whitelist:['10pt', '12pt', '14pt', '18pt', '24pt']
+}));
+var toolbarOptions = [
+['bold', 'italic', 'underline'],
 
-	[{ 'list': 'ordered'}, { 'list': 'bullet' }],
+[{ 'list': 'ordered'}, { 'list': 'bullet' }],
 
-	[{ 'script': 'sub'}, { 'script': 'super' }],      // superscript/subscript
+[{ 'script': 'sub'}, { 'script': 'super' }],      // superscript/subscript
 
-	[{ 'indent': '-1'}, { 'indent': '+1' }],          // outdent/indent
-	  
-	[{ 'custom-size': ['10pt', '12pt', '14pt', '18pt', '24pt']}],  // custom dropdown
+[{ 'indent': '-1'}, { 'indent': '+1' }],          // outdent/indent
+  
+[{ 'custom-size': ['10pt', '12pt', '14pt', '18pt', '24pt']}],  // custom dropdown
 
-	[{ 'color': [] }, { 'background': [] }],          // dropdown with defaults from theme
-	
-	[{ 'align': [] }],
+[{ 'color': [] }, { 'background': [] }],          // dropdown with defaults from theme
 
-	['link', "image", 'video', 'formula'],
+[{ 'align': [] }],
 
-	['clean']
-	
-	];
-	var quill = new Quill('#editor', {
-   	modules:{
-   	 	toolbar: toolbarOptions
-   	},
-   	theme: 'snow'
-  	});
+['link', "image", 'video', 'formula'],
 
-	var toolbar = quill.getModule('toolbar');
-	toolbar.addHandler('image', function(){
-	$("#InsertImage").show();
-	$("#txtURL").focus();
-	});
-	$("#btnClose").click(function(){
-	$("#InsertImage").hide();
-	$("#txtURL").val("");
-	$("#file").val("");
-	$("#rdURL").click();
+['clean']
 
-	});
-	$("#rdURL").click(function(){
-	$("#txtURL").prop("disabled", false);
-	$("#file").prop("disabled", true);
-	});
-	$("#rdFile").click(function(){
-	$("#txtURL").prop("disabled", true);
-	$("#file").prop("disabled", false);
+];
+var quill = new Quill('#editor', {
+	modules:{
+	 	toolbar: toolbarOptions
+	},
+	theme: 'snow'
 	});
 
+var toolbar = quill.getModule('toolbar');
+toolbar.addHandler('image', function(){
+	var divOverlay = document.createElement("div");
+	divOverlay.className = "overlay";
 
-	$("#btnInsert").click(function(e) {
-	 	e.preventDefault();
-	if ($("#rdURL").prop("checked")){
-	 	var selection = quill.getSelection(true);
-	 	var url = $("#txtURL").val();
-	 	quill.insertEmbed(selection.index, 'image', url);
-	} else {
-	 	//Implementar upload de arquivo.
-	 	//do file input #file
+	var divWindow = document.createElement("div");
+	divWindow.className = "window";
+	divOverlay.appendChild(divWindow);
+
+	var btnClose = document.createElement("div");
+	btnClose.className = "close";
+	btnClose.innerHTML = "&times;";
+	btnClose.onclick = function (){
+		document.body.removeChild(divOverlay);
 	}
-	$("#InsertImage").hide();
-	$("#txtURL").val("");
-	$("#file").val("");
-	$("#rdURL").click();
-	});
-	</script>
+	divWindow.appendChild(btnClose);
+
+	var divHeader = document.createElement("div");
+	divHeader.className = "header";
+	divHeader.innerHTML = "Inserir Imagem";
+	divWindow.appendChild(divHeader);
+
+	var form = document.createElement("form");
+	divWindow.appendChild(form);
+
+	var divSectionUrl = document.createElement("div");
+	divSectionUrl.className = "section";
+	form.appendChild(divSectionUrl);
+
+	var labelUrl = document.createElement("label");
+	divSectionUrl.appendChild(labelUrl);
+
+	var rdURL = document.createElement("input");
+	rdURL.type = "radio";
+	rdURL.name ="method";
+	rdURL.value = "url";
+	rdURL.checked = "true";
+	rdURL.onclick = function(){
+		txtURL.disabled = false;
+		txtFile.disabled = true;
+	};
+	labelUrl.appendChild(rdURL);
+	labelUrl.appendChild(document.createTextNode("Inserir da url..."));
+
+	var txtURL = document.createElement("input");
+	txtURL.type = "text";
+	txtURL.placeholder = "http://";
+	divSectionUrl.appendChild(txtURL);
+
+	//TODO inserir section com file input
+	
+	var divSectionFile = document.createElement("div");
+	divSectionFile.className = "section";
+	form.appendChild(divSectionFile);
+
+	var labelFile = document.createElement("label");
+	divSectionFile.appendChild(labelFile);
+
+	var rdFile = document.createElement("input");
+	rdFile.type = "radio";
+	rdFile.name ="method";
+	rdFile.value = "file";
+	rdFile.onclick = function(){
+		txtFile.disabled = false;
+		txtURL.disabled = true;
+	};
+	labelFile.appendChild(rdFile);
+	labelFile.appendChild(document.createTextNode("Inserir do Arquivo..."));
+
+	var txtFile = document.createElement("input");
+	txtFile.type = "file";
+	txtFile.disabled = true;
+	divSectionFile.appendChild(txtFile);
+
+	var divSectionButton = document.createElement("div");
+	divSectionButton.className = "section center";
+	form.appendChild(divSectionButton);
+	//Botão de Inserir
+	var btnInsert = document.createElement("button");
+	btnInsert.innerHTML = "Inserir Imagem";
+	btnInsert.onclick = function(e){
+		e.preventDefault();
+		if (rdURL.checked){
+			var selection = quill.getSelection(true);
+	 		var url = txtURL.value;
+	 		quill.insertEmbed(selection.index, 'image', url);
+		} else {
+			alert("estou aqui");
+		}
+		document.body.removeChild(divOverlay);
+	};
+	divSectionButton.appendChild(btnInsert);
+
+	document.body.appendChild(divOverlay);
+
+	txtURL.focus();
+});
+toolbar.addHandler('link', function(){
+	var divOverlay = document.createElement("div");
+	divOverlay.className = "overlay";
+
+	var divWindow = document.createElement("div");
+	divWindow.className = "window";
+	divOverlay.appendChild(divWindow);
+
+	var btnClose = document.createElement("div");
+	btnClose.className = "close";
+	btnClose.innerHTML = "&times;";
+	btnClose.onclick = function (){
+		document.body.removeChild(divOverlay);
+	}
+	divWindow.appendChild(btnClose);
+
+	var divHeader = document.createElement("div");
+	divHeader.className = "header";
+	divHeader.innerHTML = "Inserir Link";
+	divWindow.appendChild(divHeader);
+
+	var form = document.createElement("form");
+	divWindow.appendChild(form);
+
+	var divSectionUrl = document.createElement("div");
+	divSectionUrl.className = "section";
+	form.appendChild(divSectionUrl);
+
+	var labelUrl = document.createElement("label");
+	divSectionUrl.appendChild(labelUrl);
+
+	labelUrl.appendChild(document.createTextNode("Inserir link para url..."));
+
+	var txtURL = document.createElement("input");
+	txtURL.type = "text";
+	txtURL.placeholder = "http://";
+	divSectionUrl.appendChild(txtURL);
+
+	var divSectionButton = document.createElement("div");
+	divSectionButton.className = "section center";
+	form.appendChild(divSectionButton);
+	//Botão de Inserir
+	var btnInsert = document.createElement("button");
+	btnInsert.innerHTML = "Inserir Link";
+	btnInsert.onclick = function(e){
+		e.preventDefault();
+		var selection = quill.getSelection(true);
+		var url = txtURL.value;
+		if (url.substr(0,7) != "http://"){
+			url = "http://" + url;
+		}
+		if (selection.length > 0){
+			quill.format ('link', url);
+		} else {
+			quill.insertText(selection.index, url, 'link', url);
+		}
+		document.body.removeChild(divOverlay);
+		};
+	divSectionButton.appendChild(btnInsert);
+
+	document.body.appendChild(divOverlay);
+
+	txtURL.focus();
+});
+
+
+</script>
 
 </body>
 </html>
